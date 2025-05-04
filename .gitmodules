@@ -1,0 +1,6 @@
+[submodule "subvendorApiGenerator"]
+	path = subvendorApiGenerator
+	url = git@github.com:hedonicadapter/subvendorApiGenerator.git
+[submodule "subvendorIACProvisioner"]
+	path = subvendorIACProvisioner
+	url = git@github.com:hedonicadapter/subvendorIACProvisioner.git
