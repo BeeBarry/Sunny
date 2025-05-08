@@ -4,3 +4,6 @@
 [submodule "subvendorIACProvisioner"]
 	path = subvendorIACProvisioner
 	url = git@github.com:hedonicadapter/subvendorIACProvisioner.git
+[submodule "IAC"]
+	path = IAC
+	url = git@github.com:hedonicadapter/terraform-modules.git
