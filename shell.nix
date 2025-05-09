@@ -39,5 +39,13 @@ in
       source .venv/bin/activate
       find . -name "requirements.txt" -exec .venv/bin/pip install -r {} \;
       .venv/bin/python --version
+
+
+      if az account show &>/dev/null; then
+        export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+      else
+        (az login || echo "login skipped or interrupted") && \
+        export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+      fi
     '';
   }
