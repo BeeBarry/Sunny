@@ -20,6 +20,9 @@ in
 
         bicep
         terraform
+
+        colima
+        docker
       ]
       # Language servers, linters, and formatters
       ++ [

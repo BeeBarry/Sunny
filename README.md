@@ -9,6 +9,9 @@
 ## subvendor API generator
 
 ## subvendor IAC provisioner
+containerized due to GitPython git dependency
+containerization adds significant complexity due vscode not supporting containerized function app deployments,
+and having to manage a container registry
 
 ## IAC
 unless you have a CSP, EA, or MCA with Azure, terraform apply results in:
