@@ -1,3 +1,5 @@
+![architecture](bilaga-1main.png "Architecture")
+
 ### TODO: 
 - [ ] fix json schema so it includes all variables.tf
 - [ ] remove "variables.tf" from schema field name
