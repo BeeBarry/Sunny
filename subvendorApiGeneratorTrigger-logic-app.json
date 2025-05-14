@@ -50,7 +50,7 @@
                             "method": "GET",
                             "headers": {
                                 "Accept": "application/vnd.github+json",
-                                "Authorization": "Bearer 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"
+                                "Authorization": "Bearer "
                             },
                             "queries": {
                                 "recursive": "true"
@@ -132,7 +132,7 @@
                                 "expression": {
                                     "and": [
                                         {
-                                            "endsWith": [
+                                            "equals": [
                                                 "@item()['path']",
                                                 "variables.tf"
                                             ]
@@ -146,7 +146,7 @@
                                             "uri": "https://api.github.com/repos/hedonicadapter/terraform-modules/contents/@{item()['path']}",
                                             "method": "GET",
                                             "headers": {
-                                                "Authorization": "Bearer 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"
+                                                "Authorization": "Bearer "
                                             }
                                         },
                                         "runtimeConfiguration": {
@@ -218,51 +218,24 @@
                                             ]
                                         }
                                     },
-                                    "Combine_content_with_CurrentKVP": {
-                                        "type": "Compose",
-                                        "inputs": "@{variables('contents')}@{variables('CurrentKVP')}",
-                                        "runAfter": {
-                                            "Set_CurrentKVP": [
-                                                "Succeeded"
-                                            ]
-                                        }
-                                    },
-                                    "Update_contents_variable": {
-                                        "type": "SetVariable",
+                                    "sendToApiGenerator": {
+                                        "type": "Http",
                                         "inputs": {
-                                            "name": "contents",
-                                            "value": "@body('Parse_result_into_object')"
-                                        },
-                                        "runAfter": {
-                                            "Parse_result_into_object": [
-                                                "Succeeded"
-                                            ]
-                                        }
-                                    },
-                                    "Set_CurrentKVP": {
-                                        "type": "SetVariable",
-                                        "inputs": {
-                                            "name": "CurrentKVP",
-                                            "value": {
-                                                "@{body('Parse_JSON_1')?['path']}": "@{body('Parse_JSON_1')?['content']}"
+                                            "uri": "https://api-generator-idiot-ms.azurewebsites.net/api/createSpec/versioning-not-implemented?code=",
+                                            "method": "POST",
+                                            "body": {
+                                                "contents": "@body('Parse_JSON_1')?['content']"
                                             }
                                         },
                                         "runAfter": {
                                             "Parse_JSON_1": [
                                                 "Succeeded"
                                             ]
-                                        }
-                                    },
-                                    "Parse_result_into_object": {
-                                        "type": "ParseJson",
-                                        "inputs": {
-                                            "content": "@outputs('Combine_content_with_CurrentKVP')",
-                                            "schema": {}
                                         },
-                                        "runAfter": {
-                                            "Combine_content_with_CurrentKVP": [
-                                                "Succeeded"
-                                            ]
+                                        "runtimeConfiguration": {
+                                            "contentTransfer": {
+                                                "transferMode": "Chunked"
+                                            }
                                         }
                                     }
                                 },
@@ -276,90 +249,10 @@
                                 "Succeeded"
                             ]
                         }
-                    },
-                    "Set_variable": {
-                        "type": "SetVariable",
-                        "inputs": {
-                            "name": "ResponseData",
-                            "value": {
-                                "contents": "@variables('contents')"
-                            }
-                        },
-                        "runAfter": {
-                            "For_each_2": [
-                                "Succeeded"
-                            ]
-                        }
-                    },
-                    "sendToApiGenerator": {
-                        "type": "Http",
-                        "inputs": {
-                            "uri": "https://api-generator-idiot-ms.azurewebsites.net/api/createSpec/versioning-not-implemented?code=XMWXQ9QEXSuImoM_rXfXlrpEcJsreKjtYtRkRmQFrGpVAzFu6ukjaw==",
-                            "method": "POST",
-                            "body": "@variables('ResponseData')"
-                        },
-                        "runAfter": {
-                            "Set_variable": [
-                                "Succeeded"
-                            ]
-                        },
-                        "runtimeConfiguration": {
-                            "contentTransfer": {
-                                "transferMode": "Chunked"
-                            }
-                        }
                     }
                 },
                 "else": {
                     "actions": {}
-                },
-                "runAfter": {
-                    "CurrentKVP": [
-                        "Succeeded"
-                    ]
-                }
-            },
-            "contents": {
-                "type": "InitializeVariable",
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "contents",
-                            "type": "object"
-                        }
-                    ]
-                },
-                "runAfter": {
-                    "ResponseData_variable": [
-                        "Succeeded"
-                    ]
-                }
-            },
-            "CurrentKVP": {
-                "type": "InitializeVariable",
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "CurrentKVP",
-                            "type": "object"
-                        }
-                    ]
-                },
-                "runAfter": {
-                    "contents": [
-                        "Succeeded"
-                    ]
-                }
-            },
-            "ResponseData_variable": {
-                "type": "InitializeVariable",
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "ResponseData",
-                            "type": "object"
-                        }
-                    ]
                 },
                 "runAfter": {}
             }
