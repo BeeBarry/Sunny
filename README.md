@@ -1,20 +1,18 @@
 ![architecture](bilaga-1main.png "Architecture")
 
 ### TODO: 
-- [ ] subvendor API generator sandbox to fix schema format
-    - [ ] fix json schema so it includes all variables.tf
-    - [ ] remove "variables.tf" from schema field name
+~~- [ ] subvendor API generator sandbox to fix schema format~~
+~~     - [ ] fix json schema so it includes all variables.tf~~
+~~     - [ ] remove "variables.tf" from schema field name~~
 
-- [ ] use schema in APIM
+~~- [ ] use schema in APIM~~
 ...
-- [ ] write subvendorIACProvisioner function app
+- [x] write subvendorIACProvisioner function app
+- [ ] write proper variables.tf for subscription IAC
 
 ## subvendor API generator
 
 ## subvendor IAC provisioner
-containerized due to GitPython git dependency
-containerization adds significant complexity due vscode not supporting containerized function app deployments,
-and having to manage a container registry
 
 ## IAC
 unless you have a CSP, EA, or MCA with Azure, terraform apply results in:
