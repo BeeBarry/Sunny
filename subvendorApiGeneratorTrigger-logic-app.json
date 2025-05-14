@@ -1,344 +1,387 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "contentVersion": "1.0.0.0",
-    "triggers": {
-      "When_a_pull_request_is_created_or_modified": {
-        "type": "ApiConnectionWebhook",
-        "inputs": {
-          "host": {
-            "connection": {
-              "name": "@parameters('$connections')['github']['connectionId']"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "When_a_pull_request_is_created_or_modified": {
+                "type": "ApiConnectionWebhook",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['github']['connectionId']"
+                        }
+                    },
+                    "body": {
+                        "events": [
+                            "pull_request"
+                        ],
+                        "active": true,
+                        "name": "web",
+                        "config": {
+                            "content_type": "json",
+                            "url": "@listCallbackUrl()"
+                        }
+                    },
+                    "headers": {
+                        "Accept": "application/vnd.github.v3+json"
+                    },
+                    "path": "/repos/@{encodeURIComponent('hedonicadapter')}/@{encodeURIComponent('terraform-modules')}/hooks"
+                }
             }
-          },
-          "body": {
-            "events": ["pull_request"],
-            "active": true,
-            "name": "web",
-            "config": {
-              "content_type": "json",
-              "url": "@listCallbackUrl()"
-            }
-          },
-          "headers": {
-            "Accept": "application/vnd.github.v3+json"
-          },
-          "path": "/repos/@{encodeURIComponent('hedonicadapter')}/@{encodeURIComponent('terraform-modules')}/hooks"
-        }
-      }
-    },
-    "actions": {
-      "Condition_1": {
-        "type": "If",
-        "expression": {
-          "and": [
-            {
-              "equals": ["@triggerBody()?['pull_request']?['merged']", true]
-            }
-          ]
         },
         "actions": {
-          "Get_repo_tree": {
-            "type": "Http",
-            "inputs": {
-              "uri": "https://api.github.com/repos/hedonicadapter/terraform-modules/git/trees/main",
-              "method": "GET",
-              "headers": {
-                "Accept": "application/vnd.github+json",
-                "Authorization": "Bearer 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"
-              },
-              "queries": {
-                "recursive": "true"
-              }
-            },
-            "runtimeConfiguration": {
-              "contentTransfer": {
-                "transferMode": "Chunked"
-              }
-            }
-          },
-          "Parse_JSON": {
-            "type": "ParseJson",
-            "inputs": {
-              "content": "@body('Get_repo_tree')",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "sha": {
-                    "type": "string"
-                  },
-                  "url": {
-                    "type": "string"
-                  },
-                  "tree": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "path": {
-                          "type": "string"
-                        },
-                        "mode": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string"
-                        },
-                        "sha": {
-                          "type": "string"
-                        },
-                        "url": {
-                          "type": "string"
-                        }
-                      },
-                      "required": ["path", "mode", "type", "sha", "url"]
-                    }
-                  },
-                  "truncated": {
-                    "type": "boolean"
-                  }
-                },
-                "required": ["sha", "url", "tree", "truncated"]
-              }
-            },
-            "runAfter": {
-              "Get_repo_tree": ["Succeeded"]
-            }
-          },
-          "For_each_2": {
-            "type": "Foreach",
-            "foreach": "@body('Parse_JSON')['tree']",
-            "actions": {
-              "Condition": {
+            "Condition_1": {
                 "type": "If",
                 "expression": {
-                  "and": [
-                    {
-                      "endsWith": ["@item()['path']", "variables.tf"]
-                    }
-                  ]
+                    "and": [
+                        {
+                            "equals": [
+                                "@triggerBody()?['pull_request']?['merged']",
+                                true
+                            ]
+                        }
+                    ]
                 },
                 "actions": {
-                  "Get_repo_content": {
-                    "type": "Http",
-                    "inputs": {
-                      "uri": "https://api.github.com/repos/hedonicadapter/terraform-modules/contents/@{item()['path']}",
-                      "method": "GET",
-                      "headers": {
-                        "Authorization": "Bearer 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"
-                      }
-                    },
-                    "runtimeConfiguration": {
-                      "contentTransfer": {
-                        "transferMode": "Chunked"
-                      }
-                    }
-                  },
-                  "Parse_JSON_1": {
-                    "type": "ParseJson",
-                    "inputs": {
-                      "content": "@body('Get_repo_content')",
-                      "schema": {
-                        "type": "object",
-                        "properties": {
-                          "type": {
-                            "type": "string"
-                          },
-                          "encoding": {
-                            "type": "string"
-                          },
-                          "size": {
-                            "type": "integer"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "path": {
-                            "type": "string"
-                          },
-                          "content": {
-                            "type": "string"
-                          },
-                          "sha": {
-                            "type": "string"
-                          },
-                          "url": {
-                            "type": "string"
-                          },
-                          "git_url": {
-                            "type": "string"
-                          },
-                          "html_url": {
-                            "type": "string"
-                          },
-                          "download_url": {
-                            "type": "string"
-                          },
-                          "_links": {
-                            "type": "object",
-                            "properties": {
-                              "git": {
-                                "type": "string"
-                              },
-                              "self": {
-                                "type": "string"
-                              },
-                              "html": {
-                                "type": "string"
-                              }
+                    "Get_repo_tree": {
+                        "type": "Http",
+                        "inputs": {
+                            "uri": "https://api.github.com/repos/hedonicadapter/terraform-modules/git/trees/main",
+                            "method": "GET",
+                            "headers": {
+                                "Accept": "application/vnd.github+json",
+                                "Authorization": "Bearer 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"
+                            },
+                            "queries": {
+                                "recursive": "true"
                             }
-                          }
+                        },
+                        "runtimeConfiguration": {
+                            "contentTransfer": {
+                                "transferMode": "Chunked"
+                            }
                         }
-                      }
                     },
-                    "runAfter": {
-                      "Get_repo_content": ["Succeeded"]
-                    }
-                  },
-                  "Combine_content_with_CurrentKVP": {
-                    "type": "Compose",
-                    "inputs": "@{variables('contents')}@{variables('CurrentKVP')}",
-                    "runAfter": {
-                      "Set_CurrentKVP": ["Succeeded"]
-                    }
-                  },
-                  "Update_contents_variable": {
-                    "type": "SetVariable",
-                    "inputs": {
-                      "name": "contents",
-                      "value": "@body('Parse_result_into_object')"
+                    "Parse_JSON": {
+                        "type": "ParseJson",
+                        "inputs": {
+                            "content": "@body('Get_repo_tree')",
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "sha": {
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "type": "string"
+                                    },
+                                    "tree": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string"
+                                                },
+                                                "mode": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string"
+                                                },
+                                                "sha": {
+                                                    "type": "string"
+                                                },
+                                                "url": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "path",
+                                                "mode",
+                                                "type",
+                                                "sha",
+                                                "url"
+                                            ]
+                                        }
+                                    },
+                                    "truncated": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "required": [
+                                    "sha",
+                                    "url",
+                                    "tree",
+                                    "truncated"
+                                ]
+                            }
+                        },
+                        "runAfter": {
+                            "Get_repo_tree": [
+                                "Succeeded"
+                            ]
+                        }
                     },
-                    "runAfter": {
-                      "Parse_result_into_object": ["Succeeded"]
-                    }
-                  },
-                  "Set_CurrentKVP": {
-                    "type": "SetVariable",
-                    "inputs": {
-                      "name": "CurrentKVP",
-                      "value": {
-                        "@{body('Parse_JSON_1')?['path']}": "@{body('Parse_JSON_1')?['content']}"
-                      }
+                    "For_each_2": {
+                        "type": "Foreach",
+                        "foreach": "@body('Parse_JSON')['tree']",
+                        "actions": {
+                            "Condition": {
+                                "type": "If",
+                                "expression": {
+                                    "and": [
+                                        {
+                                            "endsWith": [
+                                                "@item()['path']",
+                                                "variables.tf"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "actions": {
+                                    "Get_repo_content": {
+                                        "type": "Http",
+                                        "inputs": {
+                                            "uri": "https://api.github.com/repos/hedonicadapter/terraform-modules/contents/@{item()['path']}",
+                                            "method": "GET",
+                                            "headers": {
+                                                "Authorization": "Bearer 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"
+                                            }
+                                        },
+                                        "runtimeConfiguration": {
+                                            "contentTransfer": {
+                                                "transferMode": "Chunked"
+                                            }
+                                        }
+                                    },
+                                    "Parse_JSON_1": {
+                                        "type": "ParseJson",
+                                        "inputs": {
+                                            "content": "@body('Get_repo_content')",
+                                            "schema": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string"
+                                                    },
+                                                    "encoding": {
+                                                        "type": "string"
+                                                    },
+                                                    "size": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "path": {
+                                                        "type": "string"
+                                                    },
+                                                    "content": {
+                                                        "type": "string"
+                                                    },
+                                                    "sha": {
+                                                        "type": "string"
+                                                    },
+                                                    "url": {
+                                                        "type": "string"
+                                                    },
+                                                    "git_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "html_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "download_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "_links": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "git": {
+                                                                "type": "string"
+                                                            },
+                                                            "self": {
+                                                                "type": "string"
+                                                            },
+                                                            "html": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "Get_repo_content": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    },
+                                    "Combine_content_with_CurrentKVP": {
+                                        "type": "Compose",
+                                        "inputs": "@{variables('contents')}@{variables('CurrentKVP')}",
+                                        "runAfter": {
+                                            "Set_CurrentKVP": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    },
+                                    "Update_contents_variable": {
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                            "name": "contents",
+                                            "value": "@body('Parse_result_into_object')"
+                                        },
+                                        "runAfter": {
+                                            "Parse_result_into_object": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    },
+                                    "Set_CurrentKVP": {
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                            "name": "CurrentKVP",
+                                            "value": {
+                                                "@{body('Parse_JSON_1')?['path']}": "@{body('Parse_JSON_1')?['content']}"
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "Parse_JSON_1": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    },
+                                    "Parse_result_into_object": {
+                                        "type": "ParseJson",
+                                        "inputs": {
+                                            "content": "@outputs('Combine_content_with_CurrentKVP')",
+                                            "schema": {}
+                                        },
+                                        "runAfter": {
+                                            "Combine_content_with_CurrentKVP": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "else": {
+                                    "actions": {}
+                                }
+                            }
+                        },
+                        "runAfter": {
+                            "Parse_JSON": [
+                                "Succeeded"
+                            ]
+                        }
                     },
-                    "runAfter": {
-                      "Parse_JSON_1": ["Succeeded"]
-                    }
-                  },
-                  "Parse_result_into_object": {
-                    "type": "ParseJson",
-                    "inputs": {
-                      "content": "@outputs('Combine_content_with_CurrentKVP')",
-                      "schema": {}
+                    "Set_variable": {
+                        "type": "SetVariable",
+                        "inputs": {
+                            "name": "ResponseData",
+                            "value": {
+                                "contents": "@variables('contents')"
+                            }
+                        },
+                        "runAfter": {
+                            "For_each_2": [
+                                "Succeeded"
+                            ]
+                        }
                     },
-                    "runAfter": {
-                      "Combine_content_with_CurrentKVP": ["Succeeded"]
+                    "sendToApiGenerator": {
+                        "type": "Http",
+                        "inputs": {
+                            "uri": "https://api-generator-idiot-ms.azurewebsites.net/api/createSpec/versioning-not-implemented?code=XMWXQ9QEXSuImoM_rXfXlrpEcJsreKjtYtRkRmQFrGpVAzFu6ukjaw==",
+                            "method": "POST",
+                            "body": "@variables('ResponseData')"
+                        },
+                        "runAfter": {
+                            "Set_variable": [
+                                "Succeeded"
+                            ]
+                        },
+                        "runtimeConfiguration": {
+                            "contentTransfer": {
+                                "transferMode": "Chunked"
+                            }
+                        }
                     }
-                  }
                 },
                 "else": {
-                  "actions": {}
+                    "actions": {}
+                },
+                "runAfter": {
+                    "CurrentKVP": [
+                        "Succeeded"
+                    ]
                 }
-              }
             },
-            "runAfter": {
-              "Parse_JSON": ["Succeeded"]
+            "contents": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "contents",
+                            "type": "object"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "ResponseData_variable": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "CurrentKVP": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "CurrentKVP",
+                            "type": "object"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "contents": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "ResponseData_variable": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "ResponseData",
+                            "type": "object"
+                        }
+                    ]
+                },
+                "runAfter": {}
             }
-          },
-          "Set_variable": {
-            "type": "SetVariable",
-            "inputs": {
-              "name": "ResponseData",
-              "value": {
-                "contents": "@variables('contents')"
-              }
-            },
-            "runAfter": {
-              "For_each_2": ["Succeeded"]
-            }
-          },
-          "sendToApiGenerator": {
-            "type": "Http",
-            "inputs": {
-              "uri": "https://api-generator-idiot-ms.azurewebsites.net/api/createSpec/versioning-not-implemented/@{triggerBody()?['pull_request']?['merge_commit_sha']}?code=XMWXQ9QEXSuImoM_rXfXlrpEcJsreKjtYtRkRmQFrGpVAzFu6ukjaw==\n",
-              "method": "POST",
-              "body": "@variables('ResponseData')"
-            },
-            "runAfter": {
-              "Set_variable": ["Succeeded"]
-            },
-            "runtimeConfiguration": {
-              "contentTransfer": {
-                "transferMode": "Chunked"
-              }
-            }
-          }
         },
-        "else": {
-          "actions": {}
-        },
-        "runAfter": {
-          "CurrentKVP": ["Succeeded"]
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
         }
-      },
-      "contents": {
-        "type": "InitializeVariable",
-        "inputs": {
-          "variables": [
-            {
-              "name": "contents",
-              "type": "object"
-            }
-          ]
-        },
-        "runAfter": {
-          "ResponseData_variable": ["Succeeded"]
-        }
-      },
-      "CurrentKVP": {
-        "type": "InitializeVariable",
-        "inputs": {
-          "variables": [
-            {
-              "name": "CurrentKVP",
-              "type": "object"
-            }
-          ]
-        },
-        "runAfter": {
-          "contents": ["Succeeded"]
-        }
-      },
-      "ResponseData_variable": {
-        "type": "InitializeVariable",
-        "inputs": {
-          "variables": [
-            {
-              "name": "ResponseData",
-              "type": "object"
-            }
-          ]
-        },
-        "runAfter": {}
-      }
     },
-    "outputs": {},
     "parameters": {
-      "$connections": {
-        "type": "Object",
-        "defaultValue": {}
-      }
-    }
-  },
-  "parameters": {
-    "$connections": {
-      "type": "Object",
-      "value": {
-        "github": {
-          "id": "/subscriptions/dfdc9108-f03d-493c-a855-142613894024/providers/Microsoft.Web/locations/westeurope/managedApis/github",
-          "connectionId": "/subscriptions/dfdc9108-f03d-493c-a855-142613894024/resourceGroups/chungus/providers/Microsoft.Web/connections/github",
-          "connectionName": "github"
+        "$connections": {
+            "type": "Object",
+            "value": {
+                "github": {
+                    "id": "/subscriptions/dfdc9108-f03d-493c-a855-142613894024/providers/Microsoft.Web/locations/westeurope/managedApis/github",
+                    "connectionId": "/subscriptions/dfdc9108-f03d-493c-a855-142613894024/resourceGroups/chungus/providers/Microsoft.Web/connections/github",
+                    "connectionName": "github"
+                }
+            }
         }
-      }
     }
-  }
 }
