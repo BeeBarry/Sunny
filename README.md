@@ -63,3 +63,4 @@ route params fungerade inte helt enkelt, inte ens med exemplet på ms docs, tog 
 man kan inte bryta sig ut ur en foreach loop i en logic app utan hacky workarounds
 terraform docs rekommenderar emot att köra IAC genom en function app lmao
 containerization adds significant complexity due vscode not supporting containerized function app deployments, and having to manage a container registry
+Initialt letade logic-appen rekursivt efter varje variables.tf-fil i hela repot, och delade in API-schemat i olika objekt som då representerade variabler till olika moduler. Tanken var att main.tf skulle mata in variablerna beroende på vad konsumenten vill provisionera. 
