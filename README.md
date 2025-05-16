@@ -44,3 +44,22 @@ module.subscription.module.lz_vending.module.subscription[0].azapi_resource.subs
 ╵
 ```
 
+## Notes
+logic app har begränsningar
+cross tenancy är inte garanterat
+“ägare”
+komplexitet, underhåll, och framtida iterationer
+hela min lösning genom IAC
+function app storage acc, inte utforskat skillnader mellan v1 och v2, anonymous access osv
+app service plans för function apps, pricing plans för APIM
+managed identity, rbac, guest tenant
+gick från https://melvinkoh.me/parsing-terraform-for-forms till python-hcl2, och från python-terraform (unmaintained) till native terraform
+i samma veva; fast än gitpython maintained, går det att göra utan den också
+~~schemat kan bli komplext, beroende på IAC-koden, och man vill inte lägga ansvaret till utomstående att ta hänsyn till subvendorn~~
+root variables.tf är vad som tar hand om att passa ner variabler till moduler, så logic-appen behöver inte gå igenom alla variables.tf rekursivt alls
+openapi schemas har andra naming conventions än terraform-moduler, så vi byter från . till _, exempelvis, men vi matar in variabler till terraform och terraform-modulerna kan förvänta sig andra namn. Detta öppnar öppnar krav till en tredje part
+https://github.com/Azure/azure-functions-openapi-extension denna finns för C#
+route params fungerade inte helt enkelt, inte ens med exemplet på ms docs, tog ~1h av min tid (Commit 50caacd https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cfunctionsv2&pivots=programming-language-python#customize-the-http-endpoint )
+man kan inte bryta sig ut ur en foreach loop i en logic app utan hacky workarounds
+terraform docs rekommenderar emot att köra IAC genom en function app lmao
+containerization adds significant complexity due vscode not supporting containerized function app deployments, and having to manage a container registry
