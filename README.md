@@ -9,6 +9,10 @@
 ...
 - [x] write subvendorIACProvisioner function app
 - [ ] write proper variables.tf for subscription IAC
+- [ ] IAC tests
+- [ ] versioning of api spec
+- [ ] cross-tenancy
+
 
 ## subvendor API generator
 
