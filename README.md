@@ -1,5 +1,6 @@
 ![architecture](bilaga-1main.png "Architecture")
 
+[paper](https://docs.google.com/document/d/18li3UCY2R5LPmqgx9XiomsI6Z8iNcBAX/edit?usp=sharing&ouid=109725606170887279736&rtpof=true&sd=true)
 ### TODO: 
 ~~- [ ] subvendor API generator sandbox to fix schema format~~
 ~~     - [ ] fix json schema so it includes all variables.tf~~
